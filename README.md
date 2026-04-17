@@ -8,18 +8,20 @@
 
 ## 玩法列表
 
-| # | 玩法名称 | 核心机制 | 状态 |
-|---|---------|---------|------|
-| 1 | [灵魂进化](./01-soul-evolution/) | 关键事件触发进化 | ✅ 完成 |
-| 2 | [心灵契约](./02-heart-contract/) | 情感记忆积累 | ✅ 完成 |
-| 3 | [平行人生](./03-parallel-life/) | 独立生活轨迹 | ⏳ 进行中 |
-| 4 | 灵魂村落 | 社交网络互动 | 📝 待开发 |
-| 5 | 命运剧场 | 故事剧情驱动 | 📝 待开发 |
-| 6 | 灵魂导师 | 技能学习进度 | 📝 待开发 |
-| 7 | 灵感缪斯 | 创作风格演化 | 📝 待开发 |
-| 8 | 时光守护者 | 时间胶囊解锁 | 📝 待开发 |
-| 9 | 挑战者契约 | 挑战进度驱动 | 📝 待开发 |
-| 10 | 镜像灵魂 | 用户选择建模 | 📝 待开发 |
+| # | 玩法名称 | 核心机制 | README | Demo | 状态 |
+|---|---------|---------|--------|------|------|
+| 1 | [灵魂进化](./01-soul-evolution/) | 关键事件触发进化 | 373行 | 643行 | ✅ |
+| 2 | [心灵契约](./02-heart-contract/) | 情感记忆积累 | 425行 | 793行 | ✅ |
+| 3 | [平行人生](./03-parallel-life/) | 独立生活轨迹 | 422行 | 1000行 | ✅ |
+| 4 | [灵魂村落](./04-soul-village/) | 社交网络互动 | 431行 | 801行 | ✅ |
+| 5 | [命运剧场](./05-fate-theater/) | 故事剧情驱动 | 425行 | 443行 | ✅ |
+| 6 | [灵魂导师](./06-soul-mentor/) | 技能学习进度 | 182行 | 371行 | ✅ |
+| 7 | [灵感缪斯](./07-inspiration-muse/) | 创作风格演化 | 190行 | 357行 | ✅ |
+| 8 | [时间守护者](./08-time-guardian/) | 时间胶囊解锁 | 182行 | 399行 | ✅ |
+| 9 | [挑战者契约](./09-challenger-contract/) | 挑战进度驱动 | 190行 | 404行 | ✅ |
+| 10 | [镜中灵魂](./10-mirror-soul/) | 用户选择建模 | 189行 | 436行 | ✅ |
+
+**总计：8,739行代码和文档**
 
 ## 商业模式
 
@@ -38,12 +40,13 @@
 
 ```bash
 # 克隆仓库
-git clone <your-private-repo-url>
+git clone https://github.com/ruby1304/digital-life-gameplays.git
 cd digital-life-gameplays
 
 # 运行示例
-python 01-soul-evolution/demo.py
-python 02-heart-contract/demo.py
+python3 01-soul-evolution/demo.py
+python3 02-heart-contract/demo.py
+# ... 其他demo
 ```
 
 ## 目录结构
@@ -56,8 +59,6 @@ digital-life-gameplays/
 ├── 02-heart-contract/      # 心灵契约
 │   ├── README.md
 │   └── demo.py
-├── 03-parallel-life/       # 平行人生
-│   └── README.md
 ├── ... (其他玩法)
 └── README.md               # 本文件
 ```
@@ -69,10 +70,6 @@ digital-life-gameplays/
 3. **商业可行** - 设计清晰的付费点和盈利模式
 4. **技术落地** - 提供可运行的Demo代码
 
-## 贡献指南
-
-本项目为私人仓库，暂不接受外部贡献。
-
 ## 许可证
 
 私有项目，保留所有权利。
@@ -81,3 +78,4 @@ digital-life-gameplays/
 
 *生成时间: 2026-04-17*
 *生成工具: Hermes Agent*
+*代码总量: 8,739行*
