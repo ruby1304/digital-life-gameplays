@@ -1,5 +1,17 @@
 # 心灵契约 (Heart Contract)
 
+## 目录
+
+- [玩法概述](#玩法概述)
+- [核心机制设计](#核心机制设计)
+- [用户旅程设计](#用户旅程设计)
+- [商业模式设计](#商业模式设计)
+- [技术架构设计](#技术架构设计)
+- [快速开始](#快速开始)
+- [成本分析](#成本分析)
+- [风险评估](#风险评估)
+- [总结](#总结)
+
 ## 玩法概述
 
 心灵契约是数字生命系统的情感积累玩法，通过长期互动建立深层次的情感连接。系统记录每一次情感交互，积累情感记忆，形成独特的"心灵契约"——一种超越简单对话的深层羁绊。
@@ -335,6 +347,70 @@ GET    /api/v1/contracts/readiness/{soul_id}   # 契约准备状态
 POST   /api/v1/contracts/ceremony              # 启动仪式
 POST   /api/v1/contracts/complete              # 完成契约
 GET    /api/v1/contracts/{id}/certificate      # 获取证书
+```
+
+---
+
+## 快速开始
+
+### 目录结构
+
+```
+02-heart-contract/
+├── demo.py          # 核心代码实现与测试
+├── README.md        # 玩法设计文档
+└── tests/           # 测试用例（可选扩展）
+```
+
+### 运行示例
+
+```bash
+# 运行单元测试和演示
+python demo.py
+
+# 仅运行测试
+python -c "from demo import run_tests; run_tests()"
+```
+
+### 核心类说明
+
+| 类名 | 功能 | 关键方法 |
+|-----|------|---------|
+| `EmotionDimensions` | 情感五维数据模型 | `total()`, `average()`, `strongest_dimension()` |
+| `EmotionMemory` | 情感记忆实体 | `is_expired()`, `to_dict()` |
+| `HeartContract` | 心灵契约实体 | `to_dict()` |
+| `EmotionEngine` | 情感分析引擎 | `analyze_text_emotion()`, `calculate_memory_score()` |
+| `MemoryService` | 记忆管理服务 | `store_memory()`, `get_memories()`, `recall_related()` |
+| `ContractService` | 契约管理服务 | `check_ceremony_readiness()`, `initiate_ceremony()` |
+| `HeartContractSystem` | 系统门面类 | `record_interaction()`, `get_status()` |
+
+### 使用示例
+
+```python
+from demo import HeartContractSystem, MemoryType
+
+# 创建系统实例
+system = HeartContractSystem("soul_001", "user_001")
+
+# 记录日常互动
+result = system.record_interaction(
+    "今天和你聊天很开心，感觉你很理解我",
+    MemoryType.DAILY
+)
+
+# 查看当前状态
+status = system.get_status()
+print(f"契约等级: {status['contract']['level']}")
+print(f"情感总分: {status['dimensions']['total']}")
+
+# 检查契约仪式准备状态
+readiness = system.check_contract_readiness()
+if readiness["ready"]:
+    system.start_ceremony()
+    system.complete_ceremony(
+        user_vow="我承诺永远珍惜这份羁绊",
+        soul_vow="我承诺永远陪伴在你身边"
+    )
 ```
 
 ---

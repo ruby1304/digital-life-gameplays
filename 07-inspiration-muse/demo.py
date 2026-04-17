@@ -43,11 +43,15 @@ class MuseLevel(Enum):
 
 class InspirationQuality(Enum):
     """灵感质量"""
-    COMMON = "普通"
-    GOOD = "良好"
-    EXCELLENT = "优秀"
-    MASTER = "大师级"
-    LEGENDARY = "传奇"
+    COMMON = (1, "普通")
+    GOOD = (2, "良好")
+    EXCELLENT = (3, "优秀")
+    MASTER = (4, "大师级")
+    LEGENDARY = (5, "传奇")
+    
+    def __init__(self, level: int, title: str):
+        self.level = level
+        self.title = title
 
 
 # ==================== 数据类定义 ====================
@@ -210,12 +214,12 @@ class InspirationMuse:
             type=inspiration_type,
             content=content,
             quality=quality,
-            tags=[inspiration_type.value, quality.value]
+            tags=[inspiration_type.value, quality.title]  # type: ignore
         )
         
         self.collection.add(inspiration)
         self.generation_count += 1
-        self.total_experience += 5 + quality.level * 2
+        self.total_experience += 5 + quality.level * 2  # type: ignore
         
         return inspiration
     

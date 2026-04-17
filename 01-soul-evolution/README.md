@@ -16,6 +16,49 @@
 
 ---
 
+## 快速开始
+
+### 运行Demo
+
+```bash
+# 进入项目目录
+cd 01-soul-evolution
+
+# 运行demo（包含单元测试和演示）
+python demo.py
+```
+
+### 基础用法示例
+
+```python
+from demo import Soul, EventGenerator, SoulForm
+
+# 1. 创建新灵魂
+soul = Soul(name="小光", user_id="user_001")
+
+# 2. 记录日常互动
+event = EventGenerator.daily_interaction()
+soul.record_interaction(event)
+
+# 3. 触发关键决策
+decision = EventGenerator.key_decision("wisdom_choice")
+soul.record_interaction(decision)
+
+# 4. 检查可用的进化选项
+available = soul.check_evolution_availability()
+print(f"可进化为: {[node.form.value for node in available]}")
+
+# 5. 执行进化
+if available:
+    success, message = soul.evolve(available[0].form)
+    print(message)
+
+# 6. 查看灵魂状态
+print(soul.get_status())
+```
+
+---
+
 ## 核心机制设计
 
 ### 1. 进化树系统
@@ -29,7 +72,7 @@
             |            |            |
        +----+----+  +----+----+  +----+----+
        |    |    |  |    |    |  |    |    |
-     哲学家 导师  先知  艺人  治愈者  作家  画家  音乐家
+    哲学家 导师 先知 艺人 治愈者 共情者 作家 画家 音乐家
 ```
 
 ### 2. 进化触发机制

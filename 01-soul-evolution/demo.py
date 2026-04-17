@@ -66,14 +66,36 @@ class EvolutionTriggerType(Enum):
 
 @dataclass
 class SoulAttributes:
-    """灵魂属性"""
+    """灵魂属性
+    
+    Attributes:
+        wisdom: 智慧 - 影响回答深度和逻辑推理能力
+        empathy: 共情 - 影响情感理解和用户连接
+        creativity: 创造力 - 影响创作能力和想象力
+        memory: 记忆 - 影响上下文理解和知识积累
+        charisma: 魅力 - 影响表达方式和吸引力
+    """
+    MAX_ATTRIBUTE = 100  # 单个属性上限
     wisdom: int = 10      # 智慧
     empathy: int = 10     # 共情
     creativity: int = 10  # 创造力
     memory: int = 10      # 记忆
     charisma: int = 10    # 魅力
     
+    def __post_init__(self):
+        """确保属性在有效范围内"""
+        self._clamp_attributes()
+    
+    def _clamp_attributes(self):
+        """将属性限制在有效范围内 [0, MAX_ATTRIBUTE]"""
+        self.wisdom = max(0, min(self.wisdom, self.MAX_ATTRIBUTE))
+        self.empathy = max(0, min(self.empathy, self.MAX_ATTRIBUTE))
+        self.creativity = max(0, min(self.creativity, self.MAX_ATTRIBUTE))
+        self.memory = max(0, min(self.memory, self.MAX_ATTRIBUTE))
+        self.charisma = max(0, min(self.charisma, self.MAX_ATTRIBUTE))
+    
     def to_dict(self) -> Dict:
+        """转换为字典格式"""
         return {
             "wisdom": self.wisdom,
             "empathy": self.empathy,
@@ -84,11 +106,19 @@ class SoulAttributes:
     
     @classmethod
     def from_dict(cls, data: Dict) -> 'SoulAttributes':
+        """从字典创建实例"""
         return cls(**data)
     
     def total(self) -> int:
+        """计算属性总和"""
         return sum([self.wisdom, self.empathy, self.creativity, 
                    self.memory, self.charisma])
+    
+    def __str__(self) -> str:
+        return f"智慧:{self.wisdom} 共情:{self.empathy} 创造:{self.creativity} 记忆:{self.memory} 魅力:{self.charisma}"
+    
+    def __repr__(self) -> str:
+        return f"SoulAttributes(wisdom={self.wisdom}, empathy={self.empathy}, creativity={self.creativity}, memory={self.memory}, charisma={self.charisma})"
 
 
 @dataclass
@@ -120,11 +150,20 @@ class Event:
     timestamp: datetime = field(default_factory=datetime.now)
     
     def apply_to(self, attributes: SoulAttributes) -> SoulAttributes:
-        """将事件效果应用到属性"""
+        """将事件效果应用到属性
+        
+        Args:
+            attributes: 要修改的灵魂属性对象
+            
+        Returns:
+            修改后的灵魂属性对象（原地修改，返回引用）
+        """
         for attr, change in self.attribute_changes.items():
             if hasattr(attributes, attr):
                 current = getattr(attributes, attr)
                 setattr(attributes, attr, max(0, current + change))
+        # 应用属性上限约束
+        attributes._clamp_attributes()
         return attributes
 
 
@@ -620,6 +659,77 @@ def test_event_generator():
     print("✓ 事件生成器测试通过")
 
 
+def test_negative_attribute_changes():
+    """测试负面属性变化（属性减少场景）"""
+    soul = Soul("测试灵魂", "test_user")
+    
+    # 测试负面属性变化
+    event = Event(
+        event_type=EventType.DAILY_INTERACTION,
+        description="负面事件测试",
+        attribute_changes={"wisdom": -5, "empathy": -3}
+    )
+    soul.record_interaction(event)
+    
+    assert soul.attributes.wisdom == 5  # 10 - 5
+    assert soul.attributes.empathy == 7  # 10 - 3
+    print("✓ 负面属性变化测试通过")
+
+
+def test_attribute_boundary():
+    """测试属性边界条件"""
+    soul = Soul("测试灵魂", "test_user")
+    
+    # 测试属性下限（不应低于0）
+    event = Event(
+        event_type=EventType.DAILY_INTERACTION,
+        description="大幅减少测试",
+        attribute_changes={"wisdom": -100}
+    )
+    soul.record_interaction(event)
+    assert soul.attributes.wisdom == 0  # 不应低于0
+    
+    # 测试属性上限（不应超过MAX_ATTRIBUTE）
+    soul.attributes.wisdom = 95
+    event2 = Event(
+        event_type=EventType.DAILY_INTERACTION,
+        description="大幅增加测试",
+        attribute_changes={"wisdom": 20}
+    )
+    soul.record_interaction(event2)
+    assert soul.attributes.wisdom == 100  # 不应超过上限
+    print("✓ 属性边界条件测试通过")
+
+
+def test_evolution_failure():
+    """测试进化失败场景"""
+    soul = Soul("测试灵魂", "test_user")
+    
+    # 属性不足时尝试进化
+    success, message = soul.evolve(SoulForm.WISDOM)
+    assert not success
+    assert "不满足进化条件" in message
+    
+    # 尝试进化到未知形态（通过直接调用不存在的形态）
+    success, message = soul.evolve(SoulForm.ORIGIN)  # 起源形态没有父节点可进化
+    # 起源形态的children不为空，但ORIGIN本身不在available列表中
+    print("✓ 进化失败场景测试通过")
+
+
+def test_invalid_event_generator():
+    """测试无效事件生成"""
+    # 测试无效的关键决策类型
+    event = EventGenerator.key_decision("invalid_type")
+    assert event.event_type == EventType.KEY_DECISION
+    assert event.attribute_changes == {}  # 无效类型返回空变化
+    
+    # 测试无效的里程碑类型
+    event2 = EventGenerator.milestone("invalid_milestone")
+    assert event2.event_type == EventType.MILESTONE
+    assert event2.description == "未知里程碑"
+    print("✓ 无效事件生成测试通过")
+
+
 def run_tests():
     """运行所有测试"""
     print("\n运行单元测试...")
@@ -629,6 +739,10 @@ def run_tests():
     test_evolution_tree()
     test_evolution()
     test_event_generator()
+    test_negative_attribute_changes()
+    test_attribute_boundary()
+    test_evolution_failure()
+    test_invalid_event_generator()
     print("-" * 40)
     print("所有测试通过! ✓\n")
 

@@ -19,7 +19,16 @@ import random
 # ==================== 枚举定义 ====================
 
 class LifeStage(Enum):
-    """人生阶段"""
+    """人生阶段
+    
+    阶段划分说明：
+    - 童年期 (0-30天): 学习探索，积累基础技能
+    - 青年期 (31-90天): 职业选择，开始独立生活
+    - 成年期 (91-365天): 事业巅峰，追求成就
+    - 中年期 (366-730天): 传承教导，培养后辈
+    - 晚年期 (731-1095天): 智慧沉淀，回顾人生
+    - 传说期 (1096天+): 永恒存在，留下传说
+    """
     CHILDHOOD = ("童年期", 0, 30, "学习探索")
     YOUTH = ("青年期", 31, 90, "职业选择")
     ADULTHOOD = ("成年期", 91, 365, "事业巅峰")
@@ -43,7 +52,15 @@ class LifeStage(Enum):
 
 
 class CareerCategory(Enum):
-    """职业类别"""
+    """职业类别
+    
+    职业类别决定了职业的核心属性需求：
+    - 知识型: 依赖智慧和逻辑
+    - 创意型: 依赖创造力和想象力
+    - 社交型: 依赖魅力和共情能力
+    - 技术型: 依赖逻辑和问题解决能力
+    - 领导型: 需要综合能力
+    """
     KNOWLEDGE = "知识型"
     CREATIVE = "创意型"
     SOCIAL = "社交型"
@@ -52,7 +69,15 @@ class CareerCategory(Enum):
 
 
 class EventType(Enum):
-    """事件类型"""
+    """事件类型
+    
+    事件类型说明：
+    - DAILY: 日常事件，高频触发，影响较小
+    - RANDOM: 随机事件，低频触发，影响较大
+    - MILESTONE: 里程碑事件，达到特定条件触发
+    - SPECIAL: 特殊事件，限时或节日触发
+    - CAREER: 职业事件，与工作相关
+    """
     DAILY = "日常事件"
     RANDOM = "随机事件"
     MILESTONE = "里程碑"
@@ -61,7 +86,15 @@ class EventType(Enum):
 
 
 class ResourceType(Enum):
-    """资源类型"""
+    """资源类型
+    
+    资源说明：
+    - ENERGY: 精力，用于工作和学习，每日恢复
+    - MOOD: 心情，影响效率和生活质量
+    - GOLD: 金币，通用货币，无上限
+    - SKILL_POINT: 技能点，用于提升技能
+    - CONNECTION: 人脉值，解锁特殊机会
+    """
     ENERGY = "精力"
     MOOD = "心情"
     GOLD = "金币"
@@ -73,7 +106,15 @@ class ResourceType(Enum):
 
 @dataclass
 class LifeResources:
-    """人生资源"""
+    """人生资源
+    
+    管理灵魂的各种资源，包括：
+    - energy: 精力值 (0-100)，用于工作和学习
+    - mood: 心情值 (0-100)，影响效率
+    - gold: 金币，无上限
+    - skill_points: 技能点，用于提升技能
+    - connection: 人脉值 (0-1000)，解锁机会
+    """
     energy: int = 100      # 精力 (0-100)
     mood: int = 70         # 心情 (0-100)
     gold: int = 100        # 金币
@@ -107,7 +148,15 @@ class LifeResources:
 
 @dataclass
 class LifeSkills:
-    """人生技能"""
+    """人生技能
+    
+    五维技能系统：
+    - wisdom: 智慧，影响知识型职业
+    - creativity: 创造力，影响创意型职业
+    - charisma: 魅力，影响社交型职业
+    - logic: 逻辑，影响技术型职业
+    - empathy: 共情，影响社交和领导型职业
+    """
     wisdom: int = 0       # 智慧
     creativity: int = 0   # 创造力
     charisma: int = 0     # 魅力
@@ -130,7 +179,18 @@ class LifeSkills:
 
 @dataclass
 class Career:
-    """职业定义"""
+    """职业定义
+    
+    属性说明：
+    - id: 职业唯一标识
+    - name: 职业名称
+    - category: 职业类别
+    - description: 职业描述
+    - required_skills: 所需技能及最低值
+    - income_range: 收入范围 (最小值, 最大值)
+    - special_ability: 特殊能力名称
+    - max_level: 最高等级，默认10级
+    """
     id: str
     name: str
     category: CareerCategory
@@ -143,7 +203,15 @@ class Career:
 
 @dataclass
 class CareerProgress:
-    """职业进度"""
+    """职业进度
+    
+    跟踪灵魂在某个职业上的发展情况：
+    - career: 当前职业
+    - level: 当前等级 (1-10)
+    - experience: 当前经验值
+    - days_worked: 工作天数
+    - achievements: 获得的成就列表
+    """
     career: Career
     level: int = 1
     experience: int = 0
@@ -169,7 +237,20 @@ class CareerProgress:
 
 @dataclass
 class LifeEvent:
-    """生活事件"""
+    """生活事件
+    
+    记录生活中发生的各种事件：
+    - id: 事件唯一标识
+    - event_type: 事件类型
+    - title: 事件标题
+    - description: 事件描述
+    - choices: 可选行动列表
+    - resource_changes: 资源变化
+    - skill_changes: 技能变化
+    - timestamp: 事件发生时间
+    - selected_choice: 已选择的行为
+    - processed: 是否已处理
+    """
     id: str
     event_type: EventType
     title: str
@@ -198,7 +279,17 @@ class LifeEvent:
 
 @dataclass
 class LifeGoal:
-    """人生目标"""
+    """人生目标
+    
+    可追踪的人生目标：
+    - id: 目标唯一标识
+    - title: 目标标题
+    - description: 目标描述
+    - target_value: 目标值
+    - current_value: 当前进度
+    - reward: 完成奖励
+    - completed: 是否已完成
+    """
     id: str
     title: str
     description: str
@@ -214,7 +305,11 @@ class LifeGoal:
 # ==================== 职业库 ====================
 
 class CareerLibrary:
-    """职业库"""
+    """职业库
+    
+    管理所有可用职业，提供职业查询和筛选功能。
+    包含5大类共12种职业，每种职业有独特的技能要求和收入范围。
+    """
     
     CAREERS = [
         # 知识型
@@ -358,7 +453,13 @@ class CareerLibrary:
 # ==================== 事件生成器 ====================
 
 class EventGenerator:
-    """生活事件生成器"""
+    """生活事件生成器
+    
+    负责生成各类生活事件：
+    - 日常事件：高频触发，影响较小
+    - 随机事件：低频触发，影响较大
+    - 里程碑事件：达到特定条件触发
+    """
     
     # 日常事件模板
     DAILY_EVENTS = [
@@ -495,7 +596,15 @@ class EventGenerator:
 # ==================== 人生引擎 ====================
 
 class LifeEngine:
-    """人生模拟引擎"""
+    """人生模拟引擎
+    
+    核心功能：
+    - 管理灵魂的人生状态和资源
+    - 推进时间并生成事件
+    - 处理事件选择和结果
+    - 管理职业发展和目标进度
+    - 计算生活满意度
+    """
     
     def __init__(self, soul_id: str, user_id: str, soul_name: str):
         self.soul_id = soul_id
@@ -995,6 +1104,164 @@ def test_life_engine():
     print("\n所有测试通过！")
 
 
+def test_stage_transitions():
+    """测试人生阶段转换"""
+    print("\n运行阶段转换测试...")
+    
+    engine = LifeEngine("stage_test", "user_001", "阶段测试")
+    
+    # 测试童年期
+    assert engine.stage == LifeStage.CHILDHOOD
+    print("✓ 初始阶段为童年期")
+    
+    # 推进到青年期
+    engine.advance_time(31)
+    assert engine.stage == LifeStage.YOUTH
+    print("✓ 31天进入青年期")
+    
+    # 推进到成年期
+    engine.advance_time(60)  # 总共91天
+    assert engine.stage == LifeStage.ADULTHOOD
+    print("✓ 91天进入成年期")
+    
+    # 推进到中年期
+    engine.advance_time(275)  # 总共366天
+    assert engine.stage == LifeStage.MIDDLE_AGE
+    print("✓ 366天进入中年期")
+    
+    print("阶段转换测试通过！")
+
+
+def test_resource_management():
+    """测试资源管理"""
+    print("\n运行资源管理测试...")
+    
+    resources = LifeResources()
+    
+    # 测试资源上限
+    resources.apply_changes({"energy": 50})
+    assert resources.energy == 100  # 上限100
+    
+    resources.apply_changes({"energy": -150})
+    assert resources.energy == 0  # 下限0
+    
+    resources.apply_changes({"connection": 2000})
+    assert resources.connection == 1000  # 上限1000
+    
+    resources.apply_changes({"gold": 1000})
+    assert resources.gold == 1100  # 无上限
+    
+    print("✓ 资源上下限测试通过")
+    
+    # 测试负值保护
+    resources.apply_changes({"gold": -5000})
+    assert resources.gold == 0  # 不能为负
+    
+    print("资源管理测试通过！")
+
+
+def test_career_progression():
+    """测试职业晋升"""
+    print("\n运行职业晋升测试...")
+    
+    engine = LifeEngine("career_test", "user_001", "职业测试")
+    engine.skills.wisdom = 40
+    engine.skills.creativity = 40
+    engine.skills.charisma = 40
+    engine.skills.logic = 40
+    engine.skills.empathy = 40
+    
+    # 申请职业
+    careers = engine.get_available_careers()
+    engine.apply_career("scholar")
+    
+    initial_level = engine.career_progress.level
+    
+    # 工作直到升级
+    for _ in range(20):
+        engine.work()
+    
+    assert engine.career_progress.level > initial_level or engine.career_progress.experience > 0
+    print(f"✓ 职业等级: {engine.career_progress.level}, 经验: {engine.career_progress.experience}")
+    
+    print("职业晋升测试通过！")
+
+
+def test_goal_completion():
+    """测试目标完成"""
+    print("\n运行目标完成测试...")
+    
+    engine = LifeEngine("goal_test", "user_001", "目标测试")
+    
+    # 直接设置技能来触发目标
+    engine.skills.wisdom = 50
+    engine.skills.creativity = 30
+    engine.skills.charisma = 20
+    
+    engine._update_goals()
+    
+    # 检查技能目标进度
+    skill_goal = next(g for g in engine.goals if g.id == "goal_skills")
+    assert skill_goal.current_value == 100
+    print(f"✓ 技能目标进度: {skill_goal.current_value}/{skill_goal.target_value}")
+    
+    print("目标完成测试通过！")
+
+
+def test_milestone_achievements():
+    """测试里程碑成就"""
+    print("\n运行里程碑成就测试...")
+    
+    engine = LifeEngine("milestone_test", "user_001", "里程碑测试")
+    
+    # 第一周里程碑
+    engine.advance_time(7)
+    assert "first_week" in engine.milestones_achieved
+    print("✓ 第一周里程碑达成")
+    
+    # 第一个月里程碑
+    engine.advance_time(23)  # 总共30天
+    assert "first_month" in engine.milestones_achieved
+    print("✓ 第一个月里程碑达成")
+    
+    print("里程碑成就测试通过！")
+
+
+def test_event_processing():
+    """测试事件处理"""
+    print("\n运行事件处理测试...")
+    
+    engine = LifeEngine("event_test", "user_001", "事件测试")
+    engine.advance_time(1)
+    
+    # 测试无效事件
+    result = engine.process_event("invalid_id", "invalid_choice")
+    assert result["success"] == False
+    print("✓ 无效事件处理正确")
+    
+    # 测试无效选择
+    if engine.events:
+        result = engine.process_event(engine.events[0].id, "invalid_choice")
+        assert result["success"] == False
+        print("✓ 无效选择处理正确")
+    
+    # 测试重复处理
+    if engine.events:
+        event = engine.events[0]
+        engine.process_event(event.id, event.choices[0]["id"])
+        result = engine.process_event(event.id, event.choices[0]["id"])
+        assert result["success"] == False
+        print("✓ 重复处理防护正确")
+    
+    print("事件处理测试通过！")
+
+
 if __name__ == "__main__":
     demo_parallel_life()
     test_life_engine()
+    test_stage_transitions()
+    test_resource_management()
+    test_career_progression()
+    test_goal_completion()
+    test_milestone_achievements()
+    test_event_processing()

@@ -36,9 +36,9 @@ class MirrorDepth(Enum):
     SUBCONSCIOUS = (5, "潜意识镜像", 50)
     ORIGIN = (6, "本源镜像", 100)
     
-    def __init__(self, level: int, name: str, dialogues_required: int):
+    def __init__(self, level: int, title: str, dialogues_required: int):
         self.level = level
-        self.name = name
+        self.title = title
         self.dialogues_required = dialogues_required
 
 
@@ -176,6 +176,10 @@ class MirrorSoul:
             if dialogue_count >= depth.dialogues_required:
                 return depth
         return MirrorDepth.SURFACE
+    
+    def get_depth_name(self) -> str:
+        """获取当前深度名称"""
+        return self.depth.title
     
     def _analyze_message(self, message: str) -> Dict:
         """分析用户消息"""
@@ -345,7 +349,7 @@ class MirrorSoul:
         """获取状态"""
         return {
             "name": self.name,
-            "depth": self.depth.name,
+            "depth": self.depth.title,
             "depth_level": self.depth.level,
             "total_dialogues": len(self.dialogues),
             "total_insights": self.total_insights,
@@ -368,7 +372,7 @@ def demo_mirror_soul():
     print("-" * 40)
     mirror = MirrorSoul(soul_id="soul_001", name="心灵之镜")
     print(f"灵魂名称: {mirror.name}")
-    print(f"初始深度: {mirror.depth.name}")
+    print(f"初始深度: {mirror.depth.title}")
     
     # 2. 进行对话
     print("\n【步骤2】进行镜像对话")
@@ -393,7 +397,7 @@ def demo_mirror_soul():
     # 3. 查看深度变化
     print("\n【步骤3】查看深度变化")
     print("-" * 40)
-    print(f"当前深度: {mirror.depth.name} (Lv.{mirror.depth.level})")
+    print(f"当前深度: {mirror.depth.title} (Lv.{mirror.depth.level})")
     print(f"对话次数: {len(mirror.dialogues)}")
     
     # 4. 发现的特质
@@ -409,7 +413,7 @@ def demo_mirror_soul():
     print("-" * 40)
     report = mirror.generate_report(MirrorDimension.PERSONALITY)
     print(f"维度: {report.dimension.value}")
-    print(f"深度: {report.depth.name}")
+    print(f"深度: {report.depth.title}")
     print(f"\n特质分析:")
     for trait in report.traits:
         print(f"  - {trait.name} ({trait.type.value}): {trait.score:.0%}")
@@ -421,7 +425,7 @@ def demo_mirror_soul():
     print("\n【步骤6】最终状态")
     print("-" * 40)
     status = mirror.get_status()
-    print(f"深度: {status['depth']} (Lv.{status['depth_level']})")
+    print(f"深度: {mirror.depth.title} (Lv.{status['depth_level']})")
     print(f"总对话: {status['total_dialogues']}次")
     print(f"总洞察: {status['total_insights']}个")
     print(f"发现特质: {status['discovered_traits']}个")

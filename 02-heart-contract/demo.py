@@ -390,36 +390,33 @@ class ContractService:
         """检查契约仪式准备状态"""
         if soul_id not in self.contracts:
             return {"ready": False, "reason": "契约不存在"}
-        
+
         contract = self.contracts[soul_id]
-        
-        requirements = {
-            ContractLevel.CONTRACT: {
-                "min_score": 1500,
-                "min_memories": 50,
-                "min_days": 90,
-                "required_level": ContractLevel.BOND
-            }
-        }
-        
-        if contract.level not in requirements:
-            return {"ready": False, "reason": "当前等级无法进行契约仪式"}
-        
-        req = requirements[contract.level]
-        
+
+        # 契约仪式要求：达到羁绊等级(BOND)且分数>=1500
+        # 注意：仪式完成后才会升级到CONTRACT等级
+        min_score = 1500
+        required_level = ContractLevel.BOND
+
+        # 检查是否已完成契约
+        if contract.ceremony_completed:
+            return {"ready": False, "reason": "契约仪式已完成"}
+
         checks = {
-            "score_met": contract.total_score >= req["min_score"],
-            "level_met": contract.level.level >= req["required_level"].level
+            "score_met": contract.total_score >= min_score,
+            "level_met": contract.level.level >= required_level.level
         }
-        
+
         ready = all(checks.values())
-        
+
         return {
             "ready": ready,
             "current_score": contract.total_score,
-            "required_score": req["min_score"],
+            "required_score": min_score,
             "current_level": contract.level.name_cn,
-            "checks": checks
+            "required_level": required_level.name_cn,
+            "checks": checks,
+            "reason": None if ready else "未满足契约仪式条件"
         }
     
     def initiate_ceremony(self, soul_id: str) -> Dict:
@@ -761,13 +758,123 @@ def test_emotion_analysis():
 def test_contract_service():
     """测试契约服务"""
     service = ContractService()
-    
+
     contract = service.get_or_create_contract("soul_001", "user_001")
     assert contract.level == ContractLevel.ACQUAINTANCE
-    
+
     new_level = service.update_score("soul_001", 200)
     assert new_level == ContractLevel.FAMILIAR
     print("✓ 契约服务测试通过")
+
+
+def test_contract_level_edge_cases():
+    """测试契约等级边界情况"""
+    # 测试边界值
+    assert ContractLevel.from_score(0) == ContractLevel.ACQUAINTANCE
+    assert ContractLevel.from_score(100) == ContractLevel.ACQUAINTANCE
+    assert ContractLevel.from_score(101) == ContractLevel.FAMILIAR
+    assert ContractLevel.from_score(300) == ContractLevel.FAMILIAR
+    assert ContractLevel.from_score(301) == ContractLevel.TRUST
+    assert ContractLevel.from_score(10000) == ContractLevel.SOULMATE
+    print("✓ 契约等级边界测试通过")
+
+
+def test_memory_expiration():
+    """测试记忆过期机制"""
+    service = MemoryService()
+
+    # 创建一个已过期的记忆
+    expired_memory = EmotionMemory(
+        id="test_mem_expired",
+        memory_type=MemoryType.DAILY,
+        content="过期的记忆",
+        emotion_score=5,
+        dimensions_delta={EmotionDimension.TRUST: 1.0},
+        is_permanent=False,
+        expires_at=datetime.now() - timedelta(days=1)  # 昨天过期
+    )
+
+    # 创建一个永久记忆
+    permanent_memory = EmotionMemory(
+        id="test_mem_permanent",
+        memory_type=MemoryType.IMPORTANT,
+        content="永久记忆",
+        emotion_score=10,
+        dimensions_delta={EmotionDimension.TRUST: 2.0},
+        is_permanent=True
+    )
+
+    service.store_memory("soul_test", expired_memory)
+    service.store_memory("soul_test", permanent_memory)
+
+    # 不包含过期记忆
+    memories = service.get_memories("soul_test", include_expired=False)
+    assert len(memories) == 1
+    assert memories[0].is_permanent == True
+
+    # 包含过期记忆
+    all_memories = service.get_memories("soul_test", include_expired=True)
+    assert len(all_memories) == 2
+
+    # 测试过期检查
+    assert expired_memory.is_expired() == True
+    assert permanent_memory.is_expired() == False
+    print("✓ 记忆过期机制测试通过")
+
+
+def test_ceremony_flow():
+    """测试契约仪式完整流程"""
+    service = ContractService()
+
+    # 创建契约
+    contract = service.get_or_create_contract("soul_ceremony", "user_ceremony")
+
+    # 初始状态检查
+    readiness = service.check_ceremony_readiness("soul_ceremony")
+    assert readiness["ready"] == False
+
+    # 模拟达到羁绊等级
+    service.update_score("soul_ceremony", 1600)
+
+    # 手动设置等级为BOND（因为from_score会自动计算）
+    contract.level = ContractLevel.BOND
+
+    # 再次检查准备状态
+    readiness = service.check_ceremony_readiness("soul_ceremony")
+    assert readiness["ready"] == True
+
+    # 启动仪式
+    ceremony_result = service.initiate_ceremony("soul_ceremony")
+    assert ceremony_result["success"] == True
+
+    # 完成仪式
+    complete_result = service.complete_ceremony(
+        ceremony_result["ceremony_id"],
+        "用户誓言",
+        "灵魂誓言"
+    )
+    assert complete_result["success"] == True
+    assert contract.ceremony_completed == True
+    assert contract.level == ContractLevel.CONTRACT
+    assert len(contract.tokens) == 1
+
+    # 再次检查准备状态（已完成）
+    readiness = service.check_ceremony_readiness("soul_ceremony")
+    assert readiness["ready"] == False
+    assert "已完成" in readiness["reason"]
+    print("✓ 契约仪式流程测试通过")
+
+
+def test_negative_score():
+    """测试负分处理"""
+    service = ContractService()
+    service.get_or_create_contract("soul_negative", "user_negative")
+
+    # 测试负分不会导致分数低于0
+    service.update_score("soul_negative", -100)
+    contract = service.contracts["soul_negative"]
+    assert contract.total_score >= 0
+    print("✓ 负分处理测试通过")
 
 
 def run_tests():
@@ -777,8 +884,12 @@ def run_tests():
     test_emotion_dimensions()
     test_memory_storage()
     test_contract_level()
+    test_contract_level_edge_cases()
     test_emotion_analysis()
     test_contract_service()
+    test_memory_expiration()
+    test_ceremony_flow()
+    test_negative_score()
     print("-" * 40)
     print("所有测试通过! ✓\n")
 

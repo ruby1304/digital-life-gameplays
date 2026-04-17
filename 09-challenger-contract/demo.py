@@ -202,20 +202,30 @@ class ChallengerContract:
     def check_in(self, contract_id: str, 
                  success: bool = True,
                  note: str = "",
-                 proof: Optional[str] = None) -> Dict:
-        """打卡签到"""
+                 proof: Optional[str] = None,
+                 force_date: Optional[datetime] = None) -> Dict:
+        """打卡签到
+        
+        Args:
+            contract_id: 契约ID
+            success: 是否成功
+            note: 备注
+            proof: 证明
+            force_date: 强制指定日期（用于测试）
+        """
         contract = next((c for c in self.contracts if c.id == contract_id), None)
         if not contract or contract.status != ContractStatus.ACTIVE:
             return {"success": False, "message": "契约不存在或已结束"}
         
         # 检查今日是否已打卡
-        today = datetime.now().date()
+        check_date = force_date if force_date else datetime.now()
+        today = check_date.date()
         if any(ci.date.date() == today for ci in contract.check_ins):
             return {"success": False, "message": "今日已打卡"}
         
         # 创建打卡记录
         check_in = CheckIn(
-            date=datetime.now(),
+            date=check_date,
             success=success,
             note=note,
             proof=proof
@@ -342,17 +352,23 @@ def demo_challenger_contract():
     print(f"目标天数: {contract1.target_days}天")
     
     contract2 = system.create_contract(ContractType.CHALLENGE)
-    print(f"\n契约名称: {contract2.title}")
-    print(f"契约描述: {contract2.description}")
-    print(f"目标天数: {contract2.target_days}天")
+    if contract2:
+        print(f"\n契约名称: {contract2.title}")
+        print(f"契约描述: {contract2.description}")
+        print(f"目标天数: {contract2.target_days}天")
+    else:
+        print(f"\n无法创建第二个契约（已达上限）")
     
     # 3. 打卡签到
     print("\n【步骤3】打卡签到")
     print("-" * 40)
     for i in range(5):
         result = system.check_in(contract1.id, success=True, note=f"第{i+1}天打卡")
-        print(f"Day {i+1}: {result['message']}")
-        print(f"  连续: {result['current_streak']}天 | 进度: {result['progress']}")
+        if result["success"]:
+            print(f"Day {i+1}: {result['message']}")
+            print(f"  连续: {result['current_streak']}天 | 进度: {result['progress']}")
+        else:
+            print(f"Day {i+1}: {result['message']}")
     
     # 4. 查看契约状态
     print("\n【步骤4】查看契约状态")
@@ -367,6 +383,17 @@ def demo_challenger_contract():
     # 5. 模拟完成契约
     print("\n【步骤5】模拟完成契约")
     print("-" * 40)
+    # 先完成第一个契约以提升等级（使用不同日期模拟）
+    print("完成第一个契约以解锁更多契约槽...")
+    from datetime import timedelta
+    for i in range(contract1.target_days - contract1.total_check_ins):
+        # 模拟不同日期的打卡
+        fake_date = datetime.now() + timedelta(days=i)
+        result = system.check_in(contract1.id, success=True, force_date=fake_date)
+        if result.get("completed"):
+            print(f"契约【{contract1.title}】完成！")
+            break
+    
     # 创建一个短期契约用于演示完成
     short_contract = system.create_contract(
         ContractType.HABIT,
@@ -374,17 +401,22 @@ def demo_challenger_contract():
         description="连续7天早起",
         target_days=7
     )
-    print(f"创建短期契约: {short_contract.title}")
     
-    # 连续打卡完成
-    for i in range(7):
-        result = system.check_in(short_contract.id, success=True)
-        if result.get("completed"):
-            print(f"\n契约完成！")
-            print(f"获得经验: {result['reward']['experience']}")
-            print(f"灵魂能量: {result['reward']['soul_energy']}")
-            print(f"特殊奖励: {result['reward']['special_items']}")
-            print(f"成就: {result['reward']['achievement']}")
+    if short_contract:
+        print(f"创建短期契约: {short_contract.title}")
+        
+        # 连续打卡完成
+        for i in range(7):
+            fake_date = datetime.now() + timedelta(days=i)
+            result = system.check_in(short_contract.id, success=True, force_date=fake_date)
+            if result.get("completed"):
+                print(f"\n契约完成！")
+                print(f"获得经验: {result['reward']['experience']}")
+                print(f"灵魂能量: {result['reward']['soul_energy']}")
+                print(f"特殊奖励: {result['reward']['special_items']}")
+                print(f"成就: {result['reward']['achievement']}")
+    else:
+        print("无法创建新契约")
     
     # 6. 整体状态
     print("\n【步骤6】整体状态")
